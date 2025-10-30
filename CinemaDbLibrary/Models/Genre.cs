@@ -1,13 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace CinemaDbLibrary.Models
+namespace CinemaDbLibrary.Models;
+
+public partial class Genre
 {
-    public class Genre
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
+    public int GenreId { get; set; }
 
-        [JsonIgnore] // 5.1.3 Игнорирование при сериализации
-        public ICollection<FilmGenre> FilmGenres { get; set; }
-    }
+    public string? Name { get; set; }
 }

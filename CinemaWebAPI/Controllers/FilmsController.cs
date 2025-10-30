@@ -1,4 +1,4 @@
-﻿using CinemaDbLibrary.Context;
+﻿using CinemaDbLibrary.Contexts;
 using CinemaDbLibrary.Models;
 using CinemaWebAPI.Dto;
 using Microsoft.AspNetCore.Mvc;
@@ -26,10 +26,6 @@ namespace CinemaWebAPI.Controllers
 
         #region DLS
 
-
-
-
-
         // 5.2 GET-метод с параметрами запроса для постраничного вывода и сортировки
         [HttpGet("pages")]
         public async Task<ActionResult<IEnumerable<Film>>> GetFilmsPaged(
@@ -45,7 +41,7 @@ namespace CinemaWebAPI.Controllers
             {
                 "year_asc" => query.OrderBy(f => f.ReleaseYear),
                 "year_desc" => query.OrderByDescending(f => f.ReleaseYear),
-                _ => query.OrderBy(f => f.Title) // По умолчанию по названию
+                _ => query.OrderBy(f => f.Name) // По умолчанию по названию
             };
 
             // Пагинация
@@ -71,7 +67,7 @@ namespace CinemaWebAPI.Controllers
 
             if (!string.IsNullOrEmpty(title))
                 query = query
-                    .Where(f => f.Title.Contains(title));
+                    .Where(f => f.Name.Contains(title));
 
             var films = await query.ToListAsync();
             return Ok(films);
@@ -111,90 +107,90 @@ namespace CinemaWebAPI.Controllers
         }
 
         // 5.4 GET-метод с составными параметрами запроса
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Film>>> SearchFilms(
-            [FromQuery] string year = null,
-            [FromQuery] string genres = null)
-        {
-            var query = _context.Films.AsQueryable();
+        //[HttpGet("search")]
+        //public async Task<ActionResult<IEnumerable<Film>>> SearchFilms(
+        //    [FromQuery] string year = null,
+        //    [FromQuery] string genres = null)
+        //{
+        //    var query = _context.Films.AsQueryable();
 
-            // Обработка диапазона годов
-            if (!string.IsNullOrEmpty(year) && year.Contains('-'))
-            {
-                var years = year.Split('-');
-                if (years.Length == 2 && int.TryParse(years[0], out int minYear) &&
-                    int.TryParse(years[1], out int maxYear))
-                {
-                    query = query.Where(f => f.ReleaseYear >= minYear && f.ReleaseYear <= maxYear);
-                }
-            }
+        //    // Обработка диапазона годов
+        //    if (!string.IsNullOrEmpty(year) && year.Contains('-'))
+        //    {
+        //        var years = year.Split('-');
+        //        if (years.Length == 2 && int.TryParse(years[0], out int minYear) &&
+        //            int.TryParse(years[1], out int maxYear))
+        //        {
+        //            query = query.Where(f => f.ReleaseYear >= minYear && f.ReleaseYear <= maxYear);
+        //        }
+        //    }
 
-            // Обработка списка жанров
-            if (!string.IsNullOrEmpty(genres))
-            {
-                var genreList = genres.Split(',').Select(g => g.Trim()).ToList();
+        //    // Обработка списка жанров
+        //    if (!string.IsNullOrEmpty(genres))
+        //    {
+        //        var genreList = genres.Split(',').Select(g => g.Trim()).ToList();
 
-                query = query.Where(f => f.FilmGenres
-                    .Any(fg => genreList.Contains(fg.Genre.Name)));
-            }
+        //        query = query.Where(f => f.FilmGenres
+        //            .Any(fg => genreList.Contains(fg.Genre.Name)));
+        //    }
 
-            var films = await query
-                .Include(f => f.FilmGenres)
-                    .ThenInclude(fg => fg.Genre)
-                .ToListAsync();
+        //    var films = await query
+        //        .Include(f => f.FilmGenres)
+        //            .ThenInclude(fg => fg.Genre)
+        //        .ToListAsync();
 
-            return Ok(films);
-        }
+        //    return Ok(films);
+        //}
 
 
 
         // CinemaWebAPI/Controllers/FilmsController.cs (продолжение)
         // 5.5 GET-методы, возвращающие DTO со статистикой
-        [HttpGet("statistics")]
-        public async Task<ActionResult<IEnumerable<FilmDto>>> GetFilmsStatistics()
-        {
-            var filmsStats = await _context.Films
-                .Select(f => new FilmDto
-                {
-                    Id = f.Id,
-                    Title = f.Title,
-                    TicketsCount = f.Sessions
-                        .SelectMany(s => s.Tickets)
-                        .Count(),
-                    SalesProfit = f.Sessions
-                        .SelectMany(s => s.Tickets)
-                        .Sum(t => t.Session.Price)
-                })
-                .Where(f => f.TicketsCount > 0) // Только фильмы с проданными билетами
-                .ToListAsync();
+        //[HttpGet("statistics")]
+        //public async Task<ActionResult<IEnumerable<FilmDto>>> GetFilmsStatistics()
+        //{
+        //    var filmsStats = await _context.Films
+        //        .Select(f => new FilmDto
+        //        {
+        //            Id = f.FilmId,
+        //            Title = f.Name,
+        //            TicketsCount = f.Sessions
+        //                .SelectMany(s => s.Tickets)
+        //                .Count(),
+        //            SalesProfit = f.Sessions
+        //                .SelectMany(s => s.Tickets)
+        //                .Sum(t => t.Session.Price)
+        //        })
+        //        .Where(f => f.TicketsCount > 0) // Только фильмы с проданными билетами
+        //        .ToListAsync();
 
-            return Ok(filmsStats);
-        }
+        //    return Ok(filmsStats);
+        //}
 
-        // 5.5 GET-метод с параметром пути для статистики конкретного фильма
-        [HttpGet("statistics/{id}")]
-        public async Task<ActionResult<FilmDto>> GetFilmStatistics(int id)
-        {
-            var filmStats = await _context.Films
-                .Where(f => f.Id == id)
-                .Select(f => new FilmDto
-                {
-                    Id = f.Id,
-                    Title = f.Title,
-                    TicketsCount = f.Sessions
-                        .SelectMany(s => s.Tickets)
-                        .Count(),
-                    SalesProfit = f.Sessions
-                        .SelectMany(s => s.Tickets)
-                        .Sum(t => t.Session.Price)
-                })
-                .FirstOrDefaultAsync();
+        //// 5.5 GET-метод с параметром пути для статистики конкретного фильма
+        //[HttpGet("statistics/{id}")]
+        //public async Task<ActionResult<FilmDto>> GetFilmStatistics(int id)
+        //{
+        //    var filmStats = await _context.Films
+        //        .Where(f => f.FilmId == id)
+        //        .Select(f => new FilmDto
+        //        {
+        //            Id = f.FilmId,
+        //            Title = f.Name,
+        //            TicketsCount = f.Sessions
+        //                .SelectMany(s => s.Tickets)
+        //                .Count(),
+        //            SalesProfit = f.Sessions
+        //                .SelectMany(s => s.Tickets)
+        //                .Sum(t => t.Session.Price)
+        //        })
+        //        .FirstOrDefaultAsync();
 
-            if (filmStats == null)
-                return NotFound($"Фильм с ID {id} не найден");
+        //    if (filmStats == null)
+        //        return NotFound($"Фильм с ID {id} не найден");
 
-            return Ok(filmStats);
-        }
+        //    return Ok(filmStats);
+        //}
 
 
         #endregion
@@ -217,7 +213,7 @@ namespace CinemaWebAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutFilm(int id, Film film)
         {
-            if (id != film.Id)
+            if (id != film.FilmId)
             {
                 return BadRequest();
             }
@@ -250,7 +246,7 @@ namespace CinemaWebAPI.Controllers
             _context.Films.Add(film);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFilm", new { id = film.Id }, film);
+            return CreatedAtAction("GetFilm", new { id = film.FilmId }, film);
         }
 
         // DELETE: api/Films/5
@@ -271,7 +267,7 @@ namespace CinemaWebAPI.Controllers
 
         private bool FilmExists(int id)
         {
-            return _context.Films.Any(e => e.Id == id);
+            return _context.Films.Any(e => e.FilmId == id);
         }
     }
 }

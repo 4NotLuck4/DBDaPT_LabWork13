@@ -1,16 +1,19 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace CinemaDbLibrary.Models
+namespace CinemaDbLibrary.Models;
+
+public partial class Visitor
 {
-    public class Visitor
-    {
-        public int Id { get; set; }
-        public string Phone { get; set; }
-        public string Name { get; set; }
-        public DateTime? BirthDate { get; set; }
-        public string Email { get; set; }
+    public int VisitorId { get; set; }
 
-        [JsonIgnore]
-        public ICollection<Ticket> Tickets { get; set; }
-    }
+    public string Phone { get; set; } = null!;
+
+    public string? Name { get; set; }
+
+    public DateTime? Birthday { get; set; }
+
+    public string? Email { get; set; }
+
+    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

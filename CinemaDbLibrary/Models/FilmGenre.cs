@@ -1,16 +1,15 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace CinemaDbLibrary.Models
+namespace CinemaDbLibrary.Models;
+
+public partial class FilmGenre
 {
-    public class FilmGenre
-    {
-        public int FilmId { get; set; }
-        public int GenreId { get; set; }
+    public int? FilmId { get; set; }
 
-        [JsonIgnore]
-        public Film Film { get; set; }
+    public int? GenreId { get; set; }
 
-        [JsonIgnore]
-        public Genre Genre { get; set; }
-    }
+    public virtual Film? Film { get; set; }
+
+    public virtual Genre? Genre { get; set; }
 }
