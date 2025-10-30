@@ -39,7 +39,7 @@ namespace CinemaWebAPI.Controllers
             // Сортировка
             query = sortBy.ToLower() switch
             {
-                "year_asc" => query.OrderBy(f => f.ReleaseYear),
+                "year" => query.OrderBy(f => f.ReleaseYear),
                 "year_desc" => query.OrderByDescending(f => f.ReleaseYear),
                 _ => query.OrderBy(f => f.Name) // По умолчанию по названию
             };
@@ -50,14 +50,14 @@ namespace CinemaWebAPI.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            return Ok(films);
+            return films;
         }
 
         // 5.2 GET-метод с параметрами запроса для фильтрации
         [HttpGet("filter")]
         public async Task<ActionResult<IEnumerable<Film>>> GetFilmsFiltered(
             [FromQuery] int? year = null,
-            [FromQuery] string title = null)
+            [FromQuery] string? title = null)
         {
             var query = _context.Films.AsQueryable();
 
@@ -70,7 +70,7 @@ namespace CinemaWebAPI.Controllers
                     .Where(f => f.Name.Contains(title));
 
             var films = await query.ToListAsync();
-            return Ok(films);
+            return films;
         }
 
         // 5.3 GET-метод с параметром пути для получения жанров фильма
@@ -89,7 +89,7 @@ namespace CinemaWebAPI.Controllers
             return Ok(genres);
         }
 
-        // 5.3 GET-метод с параметром пути для получения будущих сеансов
+        // 5.3 GET-метод с параметром пути для получения сеансов
         [HttpGet("{id}/sessions")]
         public async Task<ActionResult<IEnumerable<Session>>> GetFilmSessions(int id)
         {
